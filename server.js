@@ -40,7 +40,16 @@ app.get("/students", async(req, res)=>{
 
 // Update
 app.put("/students/:id", async(req, res)=>{
-    const student = await Student.findByIdAndUpdate(req.params.id, req.body,{new : true} );
+    try {
+        const student = await Student.findByIdAndUpdate(req.params.id, req.body,{new : true} );
+
+        if(!student)return res.status(404).send({message: "Student Not Found"});
+        
+    res.send(student);
+    } catch (error) {
+        res.status(500).send({message: "Internal Server Error"});
+    }
+    
 });
 
 // Delete
