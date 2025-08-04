@@ -2,6 +2,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const Student = require('./models/student.model.js');
+
 
 require('dotenv').config();
 
@@ -20,7 +22,38 @@ mongoose.connect(process.env.DB_CONN)
     console.log("DB Connection Error: " , err);
 });
 
+
+// Create
+app.post('/students', async(req, res)=>{
+    const student = new Student(req.body);
+    await student.save();
+    res.send(student);
+});
+
+
+// Read All
+app.get("/students", async(req, res)=>{
+    const students = await Student.find();
+    res.send(students);
+});
+
+
+// Update
+app.put("/students/:id", async(req, res)=>{
+    const student = await Student.findByIdAndUpdate(req.params.id, req.body,{new : true} );
+});
+
+// Delete
+app.delete("/students/:id", async(req, res)=>{
+    await Student.findByIdAndDelete(req.params.id);
+    res.send({message: "Deleted"});
+});
+
+
+
 app.listen(process.env.PORT, ()=>{
     console.log(`Server serving on port ${process.env.PORT}`);
 });
+
+
 
