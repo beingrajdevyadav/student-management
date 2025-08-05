@@ -58,7 +58,29 @@ app.delete("/students/:id", async(req, res)=>{
     res.send({message: "Deleted"});
 });
 
+// URL SEARCH
+app.get("/students/search", async(req, res)=>{
+    try {
+        const {name, city, course, minAge, maxAge} = req.query;
 
+        let filter = {};
+
+        if(name) filter.name = {$regex:name, $options: "i"};
+        if(city) filter.city = city;
+        if(course) filter.course = course;
+
+        if(minAge || maxAge){
+            filter.age = {};
+            if(minAge) filter.age.$gte = parseInt(minAge);
+            if(maxAge) filter.age.$lte = parseInt(maxAge);
+        };
+
+        const students = await Student.find(filter);
+        res.send(students);
+    } catch (error) {
+       res.status(500).send({error: error.message}); 
+    }
+})
 
 app.listen(process.env.PORT, ()=>{
     console.log(`Server serving on port ${process.env.PORT}`);
