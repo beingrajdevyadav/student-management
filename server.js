@@ -61,7 +61,7 @@ app.delete("/students/:id", async(req, res)=>{
 // URL SEARCH
 app.get("/students/search", async(req, res)=>{
     try {
-        const {name, city, course, minAge, maxAge} = req.query;
+        const {name, city, course, minAge, maxAge, page=1, limit = 5, sortBy = "name", sortOrder = "asc"} = req.query;
 
         let filter = {};
 
@@ -75,12 +75,28 @@ app.get("/students/search", async(req, res)=>{
             if(maxAge) filter.age.$lte = parseInt(maxAge);
         };
 
-        const students = await Student.find(filter);
-        res.send(students);
+        const skip = (page -1 ) * limit;
+        const sort = {};
+        sort[sortBy] = sortOrder === "desc" ? (-1) : 1;
+
+        const students = await Student.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit);
+
+        const total = Student.countDocuments(filter);
+        const totalPages = Math.ceil(total/limit);
+
+        res.send({
+            total, 
+            totalPages,
+            currentPage: parseInt(page),
+            students
+        });
     } catch (error) {
        res.status(500).send({error: error.message}); 
     }
-})
+});
 
 app.listen(process.env.PORT, ()=>{
     console.log(`Server serving on port ${process.env.PORT}`);
