@@ -58,6 +58,19 @@ app.delete("/students/:id", async(req, res)=>{
     res.send({message: "Deleted"});
 });
 
+// GET STUDENT BY ID
+app.get("/students/:id", async(req, res)=>{
+    try {
+        const student = await Student.findById(req.params.id);
+        if(!student) return res.status(404).send({message: "Student Not Found"});
+
+        res.send(student);
+        
+    } catch (error) {
+       res.status(500).send({message: "Internal Server Error"}); 
+    }
+})
+
 // URL SEARCH
 app.get("/students/search", async(req, res)=>{
     try {
