@@ -71,7 +71,7 @@ app.get("/students/:id", async(req, res)=>{
     }
 })
 
-// URL SEARCH
+//  SEARCH
 app.get("/students/search", async(req, res)=>{
     try {
         const {name, city, course, minAge, maxAge, sortBy = "name", sortOrder = "asc"} = req.query;
@@ -94,17 +94,9 @@ app.get("/students/search", async(req, res)=>{
 
         const students = await Student.find(filter)
         .sort(sort)
-        
-
-        const total = Student.countDocuments(filter);
-        const totalPages = Math.ceil(total/limit);
-
-        res.send({
-            total, 
-            totalPages,
-            currentPage: parseInt(page),
-            students
-        });
+        .limit(100); // Limit to 100 results
+        if(students.length === 0) return res.status(404).send({message: "No Students Found"});
+        res.send(students);
     } catch (error) {
        res.status(500).send({error: error.message}); 
     }
